@@ -33,7 +33,7 @@ def redimensionar_imagen(input_image, output_image, width, height, quality):
     subprocess.run(command)
 
 # Lista de imágenes a procesar
-imagenes = ["C:\Users\34622\OneDrive\Escritorio\Barcelona-logo-escudo.png", 'imagen2.jpg', 'imagen3.jpg']
+imagenes = ["C:\\Users\\34622\\OneDrive\\Escritorio\\Barcelona-logo-escudo.png", 'imagen2.jpg', 'imagen3.jpg']
 # Parámetros de redimensionamiento
 ancho = 800
 alto = 600
