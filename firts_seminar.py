@@ -1,4 +1,4 @@
-#import subprocess
+import subprocess
 # task 3
 from PIL import Image
 class ex3:
@@ -36,21 +36,69 @@ class ex4:
                 while col >= 0 and row < rows:
                     result.append(matrix[row][col])
                     row += 1
-                    col -= 1
-                    
+                    col -= 1             
         return result
 
 def print_matrix(matrix, width=8):
     for i in range(0, len(matrix), width):
         print(matrix[i:i + width])
 
-array([[ 4, 19,  4, 18, 10, 19, 15, 19],
-       [ 3, 10, 20, 16, 10, 17,  4,  5],
-       [ 4, 19, 19,  5,  2, 18,  3,  8],
-       [ 1,  4,  9,  8,  9,  8,  7,  9],
-       [14,  2, 20, 11,  6, 19,  4,  6],
-       [ 4,  3,  5,  8,  4,  9, 16, 20],
-       [ 8, 16,  8,  4,  6, 16, 17,  3],
-       [ 0,  9, 14, 20, 14, 14,  0, 16]]) 
+array([[ 1,2,3, 4, 5, 6, 7, 8],
+       [ 9, 10, 11, 12, 13, 14,  15, 16],
+       [ 17, 18, 19, 20,  21, 22, 23, 24],
+       [ 25,  26,  27,  28,  29, 30, 31, 32],
+       [33, 34, 35, 36,  37, 38,  39, 40],
+       [ 41,42,43, 44, 45, 46, 47, 48],
+       [ 49, 50, 51, 52, 53, 54, 55, 56],
+       [ 57, 58, 59, 60, 61, 62, 63, 64]]) 
 
-###pruebas de si puedo hacer cambios
+
+
+class ex5:
+    def convertir_bn_y_comprimir(input_path, output_path):
+        command = [
+            'ffmpeg', '-i', input_path,  # Especifica el archivo de entrada
+            '-vf', 'format=gray',        # Convierte a blanco y negro
+            '-q:v', '31',                # Aplica la mayor compresión posible
+            output_path                  # Especifica el archivo de salida
+        ]
+        
+        # Ejecuta el comando FFmpeg
+        subprocess.run(command, check=True)
+        
+        print(f"Imagen convertida a blanco y negro y comprimida guardada en {output_path}")
+        return output_path
+
+
+#input_image = 
+#output_image = 
+#convertir_bn_y_comprimir(input_image, output_image)
+
+class ex6:
+    def run_length_encoding(data):
+        if not data:
+            return []
+        
+        encoded_data = []
+        current_byte = data[0]
+        count = 1
+        
+        # Itera a través de la secuencia de bytes
+        for byte in data[1:]:
+            if byte == current_byte:
+                # Si el byte es igual al actual, incrementa el contador
+                count += 1
+            else:
+                # Si el byte es diferente, guarda el par (count, current_byte) y reinicia el contador
+                encoded_data.append((count, current_byte))
+                current_byte = byte
+                count = 1
+        
+        # Agrega el último par (count, current_byte) al resultado
+        encoded_data.append((count, current_byte))
+        
+        return encoded_data
+
+
+            
+
