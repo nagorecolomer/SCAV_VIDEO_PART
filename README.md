@@ -11,7 +11,7 @@ Retorno: La ruta de salida de la imagen redimensionada
 
 TASK 4: Serpentina (ex4.serpentine_diagonal)
 Esta función recorre una matriz en forma de serpentina en diagonal, alternando entre movimiento ascendente y descendente.
-Lo que hicimos fue analizar el algortimo i vimos que en realidad lo que hacia era recorrer la matriz con diagonales ascendentes o descendentes 
+Lo que hicimos fue analizar el algortimo y vimos que en realidad lo que hacia era recorrer la matriz con diagonales ascendentes o descendentes 
 dependiendo de si eran pares o impares, y asi fue como realizamos este ejercicio. No lo hicimos con imagenes ya que era mas liada. 
 Parámetros:
 - matrix: Matriz de entrada a recorrer.
