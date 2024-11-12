@@ -6,6 +6,28 @@ import os
 imagen="C:\\Users\\Pocoyó\\OneDrive\\Imágenes\\MESSI.jpeg"
 output='C:\\Users\\Pocoyó\\OneDrive\\Imágenes\\images_test.jpg'
 
+class TestEx2(unittest.TestCase):
+    def test_RGB_to_YUV(self):
+        # Prueba de conversión de RGB a YUV
+        r, g, b = 255, 128, 64
+        y, u, v = ex2.RGB_to_YUV(r, g, b)
+        
+        # Verificamos valores aproximados
+        self.assertAlmostEqual(y, 125.504, places=3)
+        self.assertAlmostEqual(u, 143.226, places=3)
+        self.assertAlmostEqual(v, 92.418, places=3)
+
+    def test_YUV_to_RGB(self):
+        # Prueba de conversión de YUV a RGB
+        y, u, v = 125.5, 143.2, 92.4
+        r, g, b = ex2.YUV_to_RGB(y, u, v)
+        
+        # Verificamos valores aproximados
+        self.assertAlmostEqual(r, 255, delta=1)
+        self.assertAlmostEqual(g, 128, delta=1)
+        self.assertAlmostEqual(b, 64, delta=1)
+    
+
 class TestEx3(unittest.TestCase):
     def test_redimensionar_imagen(self):
         
