@@ -19,7 +19,6 @@ class ex3:
 
         return output_path
 
-#ex3.redimensionar_imagen(imagen,output,320,240)
 
 #TASK 4
 
@@ -52,16 +51,6 @@ def print_matrix(matrix, width=8):
     for i in range(0, len(matrix), width):
         print(matrix[i:i + width])
 
-array = ([[ 1,2,3, 4, 5, 6, 7, 8],
-       [ 9, 10, 11, 12, 13, 14,  15, 16],
-       [ 17, 18, 19, 20,  21, 22, 23, 24],
-       [ 25,  26,  27,  28,  29, 30, 31, 32],
-       [33, 34, 35, 36,  37, 38,  39, 40],
-       [ 41,42,43, 44, 45, 46, 47, 48],
-       [ 49, 50, 51, 52, 53, 54, 55, 56],
-       [ 57, 58, 59, 60, 61, 62, 63, 64]]) 
-
-
 #TASK 5
 class ex5:
     def convertir_bn_y_comprimir(input_path, output_path):
@@ -75,11 +64,6 @@ class ex5:
         #ejecuta el comando FFmpeg
         subprocess.run(command, check=True)
         return output_path
-
-
-#input_image = "C:\\Users\\Pocoyó\\OneDrive\\Imágenes\\foto cv.jpg"
-#output_image = "C:\\Users\\Pocoyó\\OneDrive\\Imágenes\\foto_cv_B&W.jpg"
-#ex5.convertir_bn_y_comprimir(input_image, output_image)
 
 #TASK 5_2
 class ex5_2:
@@ -107,23 +91,13 @@ class ex5_2:
         
         return encoded_data
             
-#data = [0, 1, 3, 6, 6, 6, 4, 4, 3, 7, 9]
-#encoded = ex5_2.run_length_encoding(data)
-#print(encoded)
-
 #TASK 6
 class ex6:
-     #lo hacemos por filas y por columnas
+     #lo hacemos por filas y por columnas, normalizamos para que salga bien la inversa luego. 
     def run_dct(data):
         return dct(dct(data, axis=0, norm='ortho'), axis=1, norm='ortho')
     def run_idct(data):
         return idct(idct(data, axis=0, norm='ortho'), axis=1, norm='ortho')
-
-data = np.arange(1, 65).reshape(8, 8)
-#result_dct = ex6.run_dct(data)
-#result_idct = ex6.run_idct(result_dct)
-#print(data)
-#print(result_idct/256) #normalizamos
 
 #TASK 7
 class ex7:
@@ -137,12 +111,3 @@ class ex7:
         coeffs = LL, (LH, HL, HH)
         return pywt.idwt2(coeffs,"haar")
     
-LL, LH, HL, HH = ex7.apply_dwt(data)
-reconstructed_data = ex7.apply_idwt(LL, LH, HL, HH)
-
-print('LL',LL)
-print('LH',LH)
-print('HL',HL)
-print('HH',HH)
-print("Matriz reconstruida después de IDWT:",reconstructed_data)
-
