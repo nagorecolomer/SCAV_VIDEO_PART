@@ -1,5 +1,5 @@
-imagen="C:\\Users\\Pocoyó\\OneDrive\\Imágenes\\Las-imagenes-raw-son-los-negativos-digitales.jpg"
-output='C:\\Users\\Pocoyó\\OneDrive\\Imágenes\\Las-imagenes-raw-son-los-negativos-digitales_resize.jpg'
+imagen="C:\\Users\\Pocoyó\\OneDrive\\Imágenes\\MESSI.jpeg"
+output='C:\\Users\\Pocoyó\\OneDrive\\Imágenes\\images_test.jpg'
 import unittest
 import numpy as np
 from first_seminar import ex3, ex4, ex5, ex5_2, ex6, ex7
@@ -7,18 +7,14 @@ import os
 
 class TestEx3(unittest.TestCase):
     def test_redimensionar_imagen(self):
-        # Aquí necesitas un archivo de imagen de prueba
-        input_path="C:\\Users\\Pocoyó\\OneDrive\\Imágenes\\Las-imagenes-raw-son-los-negativos-digitales.jpg"
-        output_path='C:\\Users\\Pocoyó\\OneDrive\\Imágenes\\Las-imagenes-raw-son-los-negativos-digitales_resize.jpg'
         
         # Prueba de redimensionado de imagen
-        ex3.redimensionar_imagen(input_path, output_path, 100, 100)
-        self.assertTrue(os.path.exists(output_path))
-        
-        # Limpiar archivos
-        os.remove(input_path)
-        os.remove(output_path)
+        ex3.redimensionar_imagen(imagen, output, 100, 100)
+        self.assertTrue(os.path.exists(output))
 
+        # Limpiar archivos
+        os.remove(output)
+        
 class TestEx4(unittest.TestCase):
     def test_serpentine_diagonal(self):
         matrix = np.arange(1, 65).reshape(8, 8)
@@ -31,16 +27,12 @@ class TestEx4(unittest.TestCase):
 
 class TestEx5(unittest.TestCase):
     def test_convertir_bn_y_comprimir(self):
-        # Aquí necesitas un archivo de imagen de prueba
-        input_path = "test_image.jpg"
-        output_path = "compressed_image.jpg"
-        
-        ex5.convertir_bn_y_comprimir(input_path, output_path)
-        self.assertTrue(os.path.exists(output_path))
+        output_path_ex5 = 'C:\\Users\\Pocoyó\\OneDrive\\Imágenes\\images_test5_BW.jpg'
+        ex5.convertir_bn_y_comprimir(imagen, output_path_ex5)
+        self.assertTrue(os.path.exists(output_path_ex5))
         
         # Limpiar archivos
-        os.remove(input_path)
-        os.remove(output_path)
+        os.remove(output_path_ex5)
        
 class TestEx5_2(unittest.TestCase):
     def test_run_length_encoding(self):
