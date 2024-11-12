@@ -1,10 +1,10 @@
-from firts_seminar import ex3, ex4, ex5, ex5_2, ex6, ex7
+from SCAV_VIDEO_PART.first_seminar import ex3, ex4, ex5, ex5_2, ex6, ex7
 
 imagen="C:\\Users\\Pocoyó\\OneDrive\\Imágenes\\Las-imagenes-raw-son-los-negativos-digitales.jpg"
 output='C:\\Users\\Pocoyó\\OneDrive\\Imágenes\\Las-imagenes-raw-son-los-negativos-digitales_resize.jpg'
 import unittest
 import numpy as np
-from first_seminar import ex3, ex4, ex5, ex5_2, ex6, ex7
+from SCAV_VIDEO_PART.first_seminar import ex3, ex4, ex5, ex5_2, ex6, ex7
 import os
 
 class TestEx3(unittest.TestCase):
