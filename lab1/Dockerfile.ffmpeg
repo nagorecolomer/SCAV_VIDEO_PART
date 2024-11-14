@@ -1,0 +1,8 @@
+# Dockerfile.ffmpeg
+FROM ubuntu:latest
+
+# Instala ffmpeg en el contenedor
+RUN apt-get update && apt-get install -y ffmpeg
+
+# Comando de entrada (ajústalo según tus necesidades)
+ENTRYPOINT ["ffmpeg"]

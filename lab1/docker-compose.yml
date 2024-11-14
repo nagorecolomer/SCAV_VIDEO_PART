@@ -1,0 +1,8 @@
+version: '3'
+services:
+  app:
+    build:
+      context: .          # Indica que Docker debe construir desde el directorio actual
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app            # Mapea la carpeta actual de tu computadora con /app en el contenedor
