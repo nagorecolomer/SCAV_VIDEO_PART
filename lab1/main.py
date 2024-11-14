@@ -3,6 +3,7 @@ from pydantic import BaseModel
 import os
 import subprocess
 from first_seminar import ex2, ex3, ex4, ex5, ex5_2, ex6, ex7
+import test_first_seminar 
 
 app = FastAPI()
 
@@ -25,6 +26,7 @@ class ResizeImageModel(BaseModel):
 
 class RunLengthEncodingModel(BaseModel):
     data: list[int]
+
     
 # 1. Endpoint para la conversión RGB a YUV
 @app.post("/rgb_to_yuv/")
