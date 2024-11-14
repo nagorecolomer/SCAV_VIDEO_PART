@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 import os
 import subprocess
-from firts_seminar import ex2, ex3, ex4, ex5, ex5_2, ex6, ex7
+from first_seminar import ex2, ex3, ex4, ex5, ex5_2, ex6, ex7
 
 app = FastAPI()
 
