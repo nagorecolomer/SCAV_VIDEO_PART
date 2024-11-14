@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from firts_seminar import ex3, ex4, ex5, ex5_2, ex6, ex7
+from firts_seminar import ex2, ex3, ex4, ex5, ex5_2, ex6, ex7
 import os
 
 imagen="C:\\Users\\Pocoyó\\OneDrive\\Imágenes\\MESSI.jpeg"

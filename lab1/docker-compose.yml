@@ -1,8 +1,19 @@
 version: '3'
 services:
-  app:
+  api:
     build:
-      context: .          # Indica que Docker debe construir desde el directorio actual
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: Dockerfile.api
+    ports:
+      - "8000:8000"      # Expone la API en el puerto 8000
     volumes:
-      - .:/app            # Mapea la carpeta actual de tu computadora con /app en el contenedor
+      - .:/app           # Mapea la carpeta actual al contenedor para reflejar cambios
+    depends_on:
+      - ffmpeg
+
+  ffmpeg:
+    build:
+      context: .
+      dockerfile: Dockerfile.ffmpeg
+    volumes:
+      - .:/app           # Mapea la carpeta actual al contenedor para acceso compartido
