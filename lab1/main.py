@@ -28,7 +28,7 @@ class RunLengthEncodingModel(BaseModel):
     
 # 1. Endpoint para la conversión RGB a YUV
 @app.post("/rgb_to_yuv/")
-def rgb_to_yuv(data: RGBModel):
+def test_RGB_to_YUV(data: RGBModel):
     try:
         y, u, v = ex2.RGB_to_YUV(data.r, data.g, data.b)
         return {"Y": y, "U": u, "V": v}
