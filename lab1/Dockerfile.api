@@ -4,7 +4,7 @@ FROM python:3.9
 WORKDIR /app
 
 COPY main.py /app
-COPY first_seminar.py /app  # Asegúrate de copiar también este archivo para que esté disponible
+COPY first_seminar.py /app 
 
 RUN pip install fastapi uvicorn numpy opencv-python-headless scipy pywavelets pillow
 
