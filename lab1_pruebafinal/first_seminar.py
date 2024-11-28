@@ -24,14 +24,17 @@ class ex2:
 from PIL import Image
 class ex3:
     def redimensionar_imagen(input_path, output_path, width, height):
+        if not os.path.exists(input_path):
+            raise FileNotFoundError(f"El archivo {input_path} no se encuentra.")
         command = [
             'ffmpeg', '-i', input_path,
             '-vf', f'scale={width}:{height}',
             output_path
         ]
-        #comando para ejecutar ffmpeg
-        subprocess.run(command, check=True)
-
+        try:
+            subprocess.run(command, check=True)
+        except subprocess.CalledProcessError as e:
+            raise Exception(f"Error ejecutando ffmpeg: {e.stderr}")
         return output_path
 
 

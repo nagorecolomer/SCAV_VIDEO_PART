@@ -1,19 +1,33 @@
-version: '3'
+version: '3.8'
+
 services:
   api:
     build:
       context: .
       dockerfile: Dockerfile.api
     ports:
-      - "8000:8000"      # Expone la API en el puerto 8000
+      - "8000:8000"      
     volumes:
-      - .:/app           # Mapea la carpeta actual al contenedor para reflejar cambios
+      - .:/app  # Mapea la carpeta actual al contenedor para reflejar cambios
     depends_on:
       - ffmpeg
+    networks:
+      - unirdocker  # Conecta el servicio 'api' a la red 'unirdocker'
 
   ffmpeg:
     build:
       context: .
       dockerfile: Dockerfile.ffmpeg
+    ports:
+      - "8000:8000"  
     volumes:
-      - .:/app           # Mapea la carpeta actual al contenedor para acceso compartido
+      - .:/app  # Mapea la carpeta actual al contenedor
+    networks:
+      - unirdocker  # Conecta el servicio 'ffmpeg' a la red 'unirdocker'
+
+# Definición de la red 'unirdocker'
+networks:
+  unirdocker:
+    driver: bridge  # El tipo de red utilizado será 'bridge'
+
+    

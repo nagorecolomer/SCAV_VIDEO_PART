@@ -1,0 +1,24 @@
+# Usa una imagen base de Python
+FROM python:3.9-slim
+
+# Actualiza el sistema e instala ffmpeg
+RUN apt-get update && apt-get install -y ffmpeg && apt-get clean
+RUN pip install ffmpeg
+
+# Configura el directorio de trabajo
+WORKDIR /app
+
+# Copia los archivos necesarios para la API
+COPY main.py /app
+COPY first_seminar.py /app
+COPY test_first_seminar.py /app
+
+
+# Instala las dependencias de la API
+RUN pip install fastapi uvicorn numpy opencv-python-headless scipy pywavelets pillow
+
+# Exponemos el puerto 8000 para la API
+EXPOSE 8000
+
+# Comando para iniciar directamente la API
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

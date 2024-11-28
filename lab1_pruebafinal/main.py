@@ -29,22 +29,22 @@ class RunLengthEncodingModel(BaseModel):
 
     
 # 1. Endpoint para la conversión RGB a YUV
-@app.post("/rgb_to_yuv/")
-def test_RGB_to_YUV(data: RGBModel):
-    try:
-        y, u, v = ex2.RGB_to_YUV(data.r, data.g, data.b)
-        return {"Y": y, "U": u, "V": v}
-    except Exception as e:
-        return {"error": str(e)}
+# @app.post("/rgb_to_yuv/")
+# def test_RGB_to_YUV(data: RGBModel):
+#     try:
+#         y, u, v = ex2.RGB_to_YUV(data.r, data.g, data.b)
+#         return {"Y": y, "U": u, "V": v}
+#     except Exception as e:
+#         return {"error": str(e)}
 
-# 2. Endpoint para la conversión YUV a RGB
-@app.post("/yuv_to_rgb/")
-def yuv_to_rgb(data: RGBModel):
-    try:
-        r, g, b = ex2.YUV_to_RGB(data.r, data.g, data.b)
-        return {"R": r, "G": g, "B": b}
-    except Exception as e:
-        return {"error": str(e)}
+# # 2. Endpoint para la conversión YUV a RGB
+# @app.post("/yuv_to_rgb/")
+# def yuv_to_rgb(data: RGBModel):
+#     try:
+#         r, g, b = ex2.YUV_to_RGB(data.r, data.g, data.b)
+#         return {"R": r, "G": g, "B": b}
+#     except Exception as e:
+#         return {"error": str(e)}
 
 # 3. Endpoint para redimensionar imágenes
 @app.post("/resize_image/")
@@ -56,13 +56,13 @@ def resize_image(data: ResizeImageModel):
         return {"error": str(e)}
 
 # 4. Endpoint para la serpentine diagonal
-@app.post("/serpentine_diagonal/")
-def serpentine_diagonal(matrix: list[list[int]]):
-    try:
-        result = ex4.serpentine_diagonal(matrix)
-        return {"result": result}
-    except Exception as e:
-        return {"error": str(e)}
+# @app.post("/serpentine_diagonal/")
+# def serpentine_diagonal(matrix: list[list[int]]):
+#     try:
+#         result = ex4.serpentine_diagonal(matrix)
+#         return {"result": result}
+#     except Exception as e:
+#         return {"error": str(e)}
 
 # 5. Endpoint para convertir a blanco y negro y comprimir
 @app.post("/convertir_bn_y_comprimir/")
@@ -74,13 +74,13 @@ def convertir_bn_y_comprimir(data: ResizeImageModel):
         return {"error": str(e)}
 
 # 6. Endpoint para codificación Run Length Encoding
-@app.post("/run_length_encoding/")
-def run_length_encoding(data: RunLengthEncodingModel):
-    try:
-        result = ex5_2.run_length_encoding(data.data)
-        return {"result": result}
-    except Exception as e:
-        return {"error": str(e)}
+# @app.post("/run_length_encoding/")
+# def run_length_encoding(data: RunLengthEncodingModel):
+#     try:
+#         result = ex5_2.run_length_encoding(data.data)
+#         return {"result": result}
+#     except Exception as e:
+#         return {"error": str(e)}
 
 # 7. Endpoint para aplicar DCT y obtener la inversa (IDCT)
 @app.post("/dct_idct/")
