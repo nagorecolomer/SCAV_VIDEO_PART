@@ -3,6 +3,7 @@ import cv2
 from scipy.fftpack import dct, idct
 import numpy as np
 import pywt
+import os
 
 
 #TASK2 

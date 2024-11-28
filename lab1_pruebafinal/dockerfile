@@ -3,7 +3,8 @@ FROM python:3.9-slim
 
 # Actualiza el sistema e instala ffmpeg
 RUN apt-get update && apt-get install -y ffmpeg && apt-get clean
-RUN pip install ffmpeg
+#RUN mkdir -p /app/uploaded_files
+RUN mkdir -p /app/images
 
 # Configura el directorio de trabajo
 WORKDIR /app
@@ -12,10 +13,11 @@ WORKDIR /app
 COPY main.py /app
 COPY first_seminar.py /app
 COPY test_first_seminar.py /app
+COPY imagenes /app
 
 
 # Instala las dependencias de la API
-RUN pip install fastapi uvicorn numpy opencv-python-headless scipy pywavelets pillow
+RUN pip install fastapi[standard] uvicorn numpy opencv-python-headless scipy pywavelets pillow
 
 # Exponemos el puerto 8000 para la API
 EXPOSE 8000

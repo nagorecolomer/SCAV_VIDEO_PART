@@ -1,5 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI,File, UploadFile
 from pydantic import BaseModel
+import shutil
 import os
 import subprocess
 from first_seminar import ex2, ex3, ex4, ex5, ex5_2, ex6, ex7
@@ -11,7 +12,19 @@ app = FastAPI()
 async def root():
     return {"message": "hola Uri,estoy probando"}
 
-
+""" @app.post("/upload-photo/")
+async def upload_photo(file: UploadFile = File(...)):
+    try:
+        # Ruta donde guardar la imagen subida dentro del contenedor
+        file_location = f"/app/uploaded_files/{file.filename}"
+        
+        # Guardar el archivo en el contenedor
+        with open(file_location, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        
+        return {"message": "Photo uploaded successfully", "file_path": file_location}
+    except Exception as e:
+        return {"error": str(e)} """
 # Modelos para validar las solicitudes de entrada
 class RGBModel(BaseModel):
     r: int
@@ -29,13 +42,13 @@ class RunLengthEncodingModel(BaseModel):
 
     
 # 1. Endpoint para la conversión RGB a YUV
-# @app.post("/rgb_to_yuv/")
-# def test_RGB_to_YUV(data: RGBModel):
-#     try:
-#         y, u, v = ex2.RGB_to_YUV(data.r, data.g, data.b)
-#         return {"Y": y, "U": u, "V": v}
-#     except Exception as e:
-#         return {"error": str(e)}
+@app.post("/rgb_to_yuv/")
+def test_RGB_to_YUV(data: RGBModel):
+    try:
+        y, u, v = ex2.RGB_to_YUV(data.r, data.g, data.b)
+        return {"Y": y, "U": u, "V": v}
+    except Exception as e:
+        return {"error": str(e)}
 
 # # 2. Endpoint para la conversión YUV a RGB
 # @app.post("/yuv_to_rgb/")
@@ -83,7 +96,7 @@ def convertir_bn_y_comprimir(data: ResizeImageModel):
 #         return {"error": str(e)}
 
 # 7. Endpoint para aplicar DCT y obtener la inversa (IDCT)
-@app.post("/dct_idct/")
+""" @app.post("/dct_idct/")
 def dct_idct(data: list[list[float]]):
     try:
         result_dct = ex6.run_dct(data)
@@ -91,13 +104,13 @@ def dct_idct(data: list[list[float]]):
         return {"result_dct": result_dct, "result_idct": result_idct}
     except Exception as e:
         return {"error": str(e)}
-
+ """
 # 8. Endpoint para aplicar DWT e IDWT
-@app.post("/dwt_idwt/")
+""" @app.post("/dwt_idwt/")
 def dwt_idwt(data: list[list[float]]):
     try:
         LL, LH, HL, HH = ex7.apply_dwt(data)
         reconstructed_data = ex7.apply_idwt(LL, LH, HL, HH)
         return {"LL": LL, "LH": LH, "HL": HL, "HH": HH, "reconstructed_data": reconstructed_data}
     except Exception as e:
-        return {"error": str(e)}
+        return {"error": str(e)} """
