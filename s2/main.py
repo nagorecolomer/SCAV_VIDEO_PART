@@ -22,7 +22,7 @@ def resize_video(data: ResizeVideoModel):
             "-vf", f"scale={data.width}:{data.height}",
             data.output_path
         ]
-        subprocess.run(comando, check=True)  # Ejecuta FFmpeg
+        subprocess.run(comando, check=True)  #ejecuta FFmpeg
         return {"message": "Video redimensionado correctamente", "output_path": data.output_path}
     except Exception as e:
         return {"error": str(e)}
@@ -201,7 +201,7 @@ def generate_motion_vectors(data: MotionVectorModel):
             "-vf", "codecview=mv=pf+bf+bb",
             data.output_path
         ]
-        # Ejecutar el comando
+        
         subprocess.run(comando, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
         return {
@@ -223,13 +223,13 @@ class YUVHistogramModel(BaseModel):
 @app.post("/generate_yuv_histogram/")
 def generate_yuv_histogram(data: YUVHistogramModel):
     try:
-        # Comando FFmpeg para generar el video con histograma YUV
+        #comando sacado de la pagina de ffmepg
         comando = [
             "ffmpeg", "-i", data.input_path,
-            "-vf", "split=2[a][b];[b]histogram,format=yuv420p[hh];[a][hh]overlay",
+            "-vf", "split=2[a][b];[b]histogram,format=yuv420p[hh];levels=full[hh];[a][hh]overlay",
             data.output_path
         ]
-        # Ejecutar el comando
+        
         subprocess.run(comando, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
         return {
