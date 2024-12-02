@@ -7,18 +7,16 @@ import json
 app = FastAPI()
 
 #EJERCICIO 1
-# Modelo para recibir parámetros del cliente
 class ResizeVideoModel(BaseModel):
     input_path: str
     output_path: str
     width: int
     height: int
 
-# Endpoint para redimensionar videos
+#endpoint para redimensionar videos, reutilizamos el endpoint del anterior lab 
 @app.post("/resize_video/")
 def resize_video(data: ResizeVideoModel):
     try:
-        #Mismo comando que resize image del lab anterior
         comando = [
             "ffmpeg", "-i", data.input_path,
             "-vf", f"scale={data.width}:{data.height}",
@@ -31,18 +29,17 @@ def resize_video(data: ResizeVideoModel):
     
 
 #EJERCICIO 2
-# Modelo de entrada
 class ChromaSubsamplingModel(BaseModel):
     input_path: str
     output_path: str
-    subsampling: str  # Valores que podemos poner como (yuv444p,yuv422p,yuv420)
+    subsampling: str  #Buscar valores en la lista de ffmepg
 
-# Endpoint para modificar el chroma subsampling
+#endpoint para modificar el chroma subsampling
 @app.post("/modify_chroma_subsampling/")
 def modify_chroma_subsampling(data: ChromaSubsamplingModel):
     try:
         comando = [
-            "ffmpeg", "-i", data.input_path,
+            "ffmpeg", "-i", data.input_path,  
             "-pix_fmt", data.subsampling,
             data.output_path
         ]
@@ -55,12 +52,11 @@ def modify_chroma_subsampling(data: ChromaSubsamplingModel):
 class VideoInfoModel(BaseModel):
     input_path: str
     
-    
-# Endpoint para leer la información del video
+#endpoint para leer la información del video
 @app.post("/get_video_info/")
 def get_video_info(data: VideoInfoModel):
     try:
-        # Ejecuta ffprobe para obtener información del video en formato JSON
+        #Comando sacado de la pagina de ffmepg
         comando = [
             "ffprobe", "-v", "error", "-show_format", "-show_streams",
             "-print_format", "json", data.input_path
@@ -93,7 +89,6 @@ def get_video_info(data: VideoInfoModel):
     
     
 #EJERCICIO 4
-# Modelo para recibir parámetros
 class VideoProcessingModel(BaseModel):
     input_path: str
     output_video_path: str
@@ -112,7 +107,7 @@ def process_video(data: VideoProcessingModel):
             "-c:v", "copy", "-c:a", "copy", data.output_video_path
         ], check=True)
 
-        #extraemos el audio en diferentes formatos
+        #extraemos el audio en diferentes formatos, los comando son sacados de la pagina oficial de ffmpeg
         # AAC Mono
         subprocess.run([
             "ffmpeg", "-i", data.output_video_path, "-ac", "1",
@@ -141,5 +136,107 @@ def process_video(data: VideoProcessingModel):
 
         return {"message": "Procesamiento completo", "final_output": data.final_output_path}
 
+    except Exception as e:
+        return {"error": str(e)}
+    
+#EJERCICIO 5 
+class TrackInfoModel(BaseModel):
+    input_path: str
+
+def obtener_pistas(file_path: str, stream_type: str) -> list:
+    #comando sacado de la pagina de ffmepg
+    comando = [
+        "ffprobe", "-i", file_path,
+        "-show_streams", "-select_streams", stream_type,
+        "-print_format", "json"
+    ]
+    resultado = subprocess.run(comando, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+
+    if resultado.returncode != 0:
+        print(f"Error al analizar {stream_type}: {resultado.stderr}")
+        return []
+
+    #para poder escribir en la api 
+    info = json.loads(resultado.stdout)
+    return info.get("streams", [])
+
+@app.post("/count_tracks/")
+def count_tracks(data: TrackInfoModel):
+    try:
+        #optenemos los tracks por separado
+        video_tracks = obtener_pistas(data.input_path, "v")  #video
+        audio_tracks = obtener_pistas(data.input_path, "a")  #audio
+        subtitle_tracks = obtener_pistas(data.input_path, "s")  #subtítulos
+
+        #contamos cada track
+        num_video_tracks = len(video_tracks)
+        num_audio_tracks = len(audio_tracks)
+        num_subtitle_tracks = len(subtitle_tracks)
+
+        #sumamos el total 
+        total_tracks = num_video_tracks + num_audio_tracks + num_subtitle_tracks
+
+        return {
+            "total_tracks": total_tracks,
+            "video_tracks": num_video_tracks,
+            "audio_tracks": num_audio_tracks,
+            "subtitle_tracks": num_subtitle_tracks
+        }
+
+    except Exception as e:
+        return {"error": str(e)}
+    
+#EJERCICIO 6
+class MotionVectorModel(BaseModel):
+    input_path: str
+    output_path: str
+
+@app.post("/generate_motion_vectors/")
+def generate_motion_vectors(data: MotionVectorModel):
+    try:
+        #comando sacado de la pagina de ffmepg
+        comando = [
+            "ffmpeg", "-flags2", "+export_mvs", "-i", data.input_path,
+            "-vf", "codecview=mv=pf+bf+bb",
+            data.output_path
+        ]
+        # Ejecutar el comando
+        subprocess.run(comando, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+        return {
+            "message": "Video generado con macroblocks y motion vectors",
+            "output_path": data.output_path
+        }
+    except subprocess.CalledProcessError as e:
+        return {"error": f"FFmpeg failed: {e.stderr}"}
+    except Exception as e:
+        return {"error": str(e)}
+    
+    
+#EJERCICIO 7
+class YUVHistogramModel(BaseModel):
+    input_path: str
+    output_path: str
+
+# Endpoint para generar el histograma YUV
+@app.post("/generate_yuv_histogram/")
+def generate_yuv_histogram(data: YUVHistogramModel):
+    try:
+        # Comando FFmpeg para generar el video con histograma YUV
+        comando = [
+            "ffmpeg", "-i", data.input_path,
+            "-vf", "split=2[a][b];[b]histogram,format=yuv420p[hh];[a][hh]overlay",
+            data.output_path
+        ]
+        # Ejecutar el comando
+        subprocess.run(comando, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+        return {
+            "message": "Video generado con el histograma YUV",
+            "output_path": data.output_path
+        }
+    except subprocess.CalledProcessError as e:
+        return {"error": f"FFmpeg failed: {e.stderr}"}
     except Exception as e:
         return {"error": str(e)}
