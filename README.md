@@ -19,12 +19,10 @@ Los principales servicios de la API incluyen:
     /images                    # Carpeta para almacenar las imágenes subidas y procesadas
     main.py                    # Archivo principal de la API FastAPI
     Dockerfile                 # Archivo Docker para crear la imagen del contenedor
-    requirements.txt           # Dependencias necesarias para ejecutar la API
 ```
 
 - **main.py**: Define los endpoints de la API utilizando FastAPI.
 - **Dockerfile**: Contiene las instrucciones necesarias para construir la imagen Docker.
-- **requirements.txt**: Lista las dependencias necesarias para la API, como FastAPI y Uvicorn.
 
 ## **Requisitos previos**
 
