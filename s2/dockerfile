@@ -3,11 +3,12 @@ FROM python:3.9-slim
 
 # Actualiza el sistema e instala ffmpeg
 RUN apt-get update && apt-get install -y ffmpeg && apt-get clean
-#RUN mkdir -p /app/uploaded_files
-RUN mkdir -p /app/images
 
 # Configura el directorio de trabajo
 WORKDIR /app
+
+# Crea las carpetas necesarias para medios
+RUN mkdir -p /app/media/input /app/media/output
 
 # Copia los archivos necesarios para la API
 COPY main.py /app
