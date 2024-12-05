@@ -5,51 +5,45 @@ import json
 import os
 import shutil
 
-# Define la ruta base de la carpeta de medios
-BASE_MEDIA_DIR = "s2\\media"
+# Define rutas base para los archivos
+BASE_MEDIA_DIR = "media"
+INPUT_DIR = os.path.join(BASE_MEDIA_DIR, "input")
+OUTPUT_DIR = os.path.join(BASE_MEDIA_DIR, "output")
+os.makedirs(INPUT_DIR, exist_ok=True)
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-# Asegúrate de que las carpetas `input` y `output` existen
-os.makedirs(os.path.join(BASE_MEDIA_DIR, "input"), exist_ok=True)
-os.makedirs(os.path.join(BASE_MEDIA_DIR, "output"), exist_ok=True)
-
-# Inicializa la app
+# Inicializamos la app
 app = FastAPI()
 
-@app.post("/upload/")
+
+# Función para guardar un archivo subido
+def save_uploaded_file(file: UploadFile, folder: str) -> str:
+    os.makedirs(folder, exist_ok=True)
+    file_path = os.path.join(folder, file.filename)
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+    return file_path
+
+
+# 1. Subir archivo
+@app.post("/upload_file/")
 async def upload_file(file: UploadFile = File(...)):
     try:
-        # Ruta donde guardar el archivo
-        input_dir = os.path.join(BASE_MEDIA_DIR, "input")
-        file_path = os.path.join(input_dir, file.filename)
-        
-        # Guardar el archivo subido
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-
-        return {"message": "Archivo subido correctamente", "file_path": file_path}
+        file_path = save_uploaded_file(file, INPUT_DIR)
+        return {"message": f"Archivo '{file.filename}' subido correctamente", "path": file_path}
     except Exception as e:
         return {"error": str(e)}
 
 
-# EJERCICIO 1
-class ResizeVideoModel(BaseModel):
-    input_path: str  # Relativo a `input`
-    output_path: str  # Relativo a `output`
-    width: int
-    height: int
-
+# 2. Redimensionar video
 @app.post("/resize_video/")
-def resize_video(data: ResizeVideoModel):
+async def resize_video(file: UploadFile = File(...), width: int = 1280, height: int = 720):
     try:
-        input_dir = os.path.join(BASE_MEDIA_DIR, "input")
-        output_dir = os.path.join(BASE_MEDIA_DIR, "output")
-        
-        input_path = os.path.join(input_dir, data.input_path)
-        output_path = os.path.join(output_dir, data.output_path)
-        
+        input_path = save_uploaded_file(file, INPUT_DIR)
+        output_path = os.path.join(OUTPUT_DIR, f"resized_{file.filename}")
         comando = [
             "ffmpeg", "-i", input_path,
-            "-vf", f"scale={data.width}:{data.height}",
+            "-vf", f"scale={width}:{height}",
             output_path
         ]
         subprocess.run(comando, check=True)
@@ -58,24 +52,15 @@ def resize_video(data: ResizeVideoModel):
         return {"error": str(e)}
 
 
-# EJERCICIO 2
-class ChromaSubsamplingModel(BaseModel):
-    input_path: str  # Relativo a `input`
-    output_path: str  # Relativo a `output`
-    subsampling: str
-
+# 3. Modificar Chroma Subsampling
 @app.post("/modify_chroma_subsampling/")
-def modify_chroma_subsampling(data: ChromaSubsamplingModel):
+async def modify_chroma_subsampling(file: UploadFile = File(...), subsampling: str = "yuv420p"):
     try:
-        input_dir = os.path.join(BASE_MEDIA_DIR, "input")
-        output_dir = os.path.join(BASE_MEDIA_DIR, "output")
-        
-        input_path = os.path.join(input_dir, data.input_path)
-        output_path = os.path.join(output_dir, data.output_path)
-        
+        input_path = save_uploaded_file(file, INPUT_DIR)
+        output_path = os.path.join(OUTPUT_DIR, f"subsampling_{file.filename}")
         comando = [
             "ffmpeg", "-i", input_path,
-            "-pix_fmt", data.subsampling,
+            "-pix_fmt", subsampling,
             output_path
         ]
         subprocess.run(comando, check=True)
@@ -84,70 +69,47 @@ def modify_chroma_subsampling(data: ChromaSubsamplingModel):
         return {"error": str(e)}
 
 
-# EJERCICIO 3
-class VideoInfoModel(BaseModel):
-    input_path: str  # Relativo a `input`
-
+# 4. Obtener información del video
 @app.post("/get_video_info/")
-def get_video_info(data: VideoInfoModel):
+async def get_video_info(file: UploadFile = File(...)):
     try:
-        input_dir = os.path.join(BASE_MEDIA_DIR, "input")
-        input_path = os.path.join(input_dir, data.input_path)
-        
+        input_path = save_uploaded_file(file, INPUT_DIR)
         comando = [
             "ffprobe", "-v", "error", "-show_format", "-show_streams",
             "-print_format", "json", input_path
         ]
         resultado = subprocess.run(comando, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        
         if resultado.returncode != 0:
             return {"error": resultado.stderr}
-
         video_info = json.loads(resultado.stdout)
-        formato = video_info.get("format", {})
-        streams = video_info.get("streams", [{}])
-        
-        data_relevante = {
-            "format_name": formato.get("format_name"),
-            "duration": float(formato.get("duration", 0)),
-            "bit_rate": int(formato.get("bit_rate", 0)),
-            "resolution": f"{streams[0].get('width')}x{streams[0].get('height')}",
-            "codec_name": streams[0].get("codec_name"),
-            "frame_rate": eval(streams[0].get("avg_frame_rate", "0")),
-        }
-
-        return {"video_info": data_relevante}
+        return {"video_info": video_info}
     except Exception as e:
         return {"error": str(e)}
 
 
-# EJERCICIO 4
-class VideoProcessingModel(BaseModel):
-    input_path: str  # Relativo a `input`
-    output_video_path: str  # Relativo a `output`
-    output_audio_aac: str  # Relativo a `output`
-    output_audio_mp3: str  # Relativo a `output`
-    output_audio_ac3: str  # Relativo a `output`
-    final_output_path: str  # Relativo a `output`
-
+# 5. Procesar video
 @app.post("/process_video/")
-def process_video(data: VideoProcessingModel):
+async def process_video(file: UploadFile = File(...)):
     try:
-        input_dir = os.path.join(BASE_MEDIA_DIR, "input")
-        output_dir = os.path.join(BASE_MEDIA_DIR, "output")
-        
-        input_path = os.path.join(input_dir, data.input_path)
-        output_video_path = os.path.join(output_dir, data.output_video_path)
-        output_audio_aac = os.path.join(output_dir, data.output_audio_aac)
-        output_audio_mp3 = os.path.join(output_dir, data.output_audio_mp3)
-        output_audio_ac3 = os.path.join(output_dir, data.output_audio_ac3)
-        final_output_path = os.path.join(output_dir, data.final_output_path)
+        input_path = save_uploaded_file(file, INPUT_DIR)
+        output_video_path = os.path.join(OUTPUT_DIR, f"processed_{file.filename}")
+        output_audio_aac = os.path.join(OUTPUT_DIR, f"audio_aac_{file.filename}.aac")
+        output_audio_mp3 = os.path.join(OUTPUT_DIR, f"audio_mp3_{file.filename}.mp3")
+        output_audio_ac3 = os.path.join(OUTPUT_DIR, f"audio_ac3_{file.filename}.ac3")
+        final_output_path = os.path.join(OUTPUT_DIR, f"final_{file.filename}")
 
-        # Cortamos el video
-        subprocess.run(["ffmpeg", "-i", input_path, "-t", "20", "-c:v", "copy", "-c:a", "copy", output_video_path], check=True)
+        # Cortar el video a 20 segundos
+        subprocess.run([
+            "ffmpeg", "-i", input_path, "-t", "20",
+            "-c:v", "copy", "-c:a", "copy", output_video_path
+        ], check=True)
+
+        # Extraer audio en diferentes formatos
         subprocess.run(["ffmpeg", "-i", output_video_path, "-ac", "1", "-c:a", "aac", output_audio_aac], check=True)
         subprocess.run(["ffmpeg", "-i", output_video_path, "-b:a", "96k", "-c:a", "libmp3lame", output_audio_mp3], check=True)
         subprocess.run(["ffmpeg", "-i", output_video_path, "-c:a", "ac3", output_audio_ac3], check=True)
+
+        # Empaquetar en un archivo final
         subprocess.run([
             "ffmpeg", "-i", output_video_path,
             "-i", output_audio_aac, "-i", output_audio_mp3, "-i", output_audio_ac3,
@@ -160,91 +122,50 @@ def process_video(data: VideoProcessingModel):
         return {"error": str(e)}
 
 
-# EJERCICIO 5
-class TrackInfoModel(BaseModel):
-    input_path: str  # Relativo a `input`
-
+# 6. Contar pistas
 @app.post("/count_tracks/")
-def count_tracks(data: TrackInfoModel):
+async def count_tracks(file: UploadFile = File(...)):
     try:
-        input_dir = os.path.join(BASE_MEDIA_DIR, "input")
-        input_path = os.path.join(input_dir, data.input_path)
-
-        def obtener_pistas(file_path: str, stream_type: str) -> list:
-            comando = [
-                "ffprobe", "-i", file_path,
-                "-show_streams", "-select_streams", stream_type,
-                "-print_format", "json"
-            ]
-            resultado = subprocess.run(comando, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-
-            if resultado.returncode != 0:
-                return []
-
-            info = json.loads(resultado.stdout)
-            return info.get("streams", [])
-
-        video_tracks = obtener_pistas(input_path, "v")
-        audio_tracks = obtener_pistas(input_path, "a")
-        subtitle_tracks = obtener_pistas(input_path, "s")
-
-        return {
-            "total_tracks": len(video_tracks) + len(audio_tracks) + len(subtitle_tracks),
-            "video_tracks": len(video_tracks),
-            "audio_tracks": len(audio_tracks),
-            "subtitle_tracks": len(subtitle_tracks),
-        }
+        input_path = save_uploaded_file(file, INPUT_DIR)
+        comando = [
+            "ffprobe", "-i", input_path,
+            "-show_streams", "-select_streams", "v", "-print_format", "json"
+        ]
+        resultado = subprocess.run(comando, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        video_tracks = len(json.loads(resultado.stdout).get("streams", []))
+        return {"message": f"El archivo tiene {video_tracks} pistas de video."}
     except Exception as e:
         return {"error": str(e)}
 
 
-# EJERCICIO 6
-class MotionVectorModel(BaseModel):
-    input_path: str  # Relativo a `input`
-    output_path: str  # Relativo a `output`
-
+# 7. Generar macroblocks y motion vectors
 @app.post("/generate_motion_vectors/")
-def generate_motion_vectors(data: MotionVectorModel):
+async def generate_motion_vectors(file: UploadFile = File(...)):
     try:
-        input_dir = os.path.join(BASE_MEDIA_DIR, "input")
-        output_dir = os.path.join(BASE_MEDIA_DIR, "output")
-        
-        input_path = os.path.join(input_dir, data.input_path)
-        output_path = os.path.join(output_dir, data.output_path)
-
+        input_path = save_uploaded_file(file, INPUT_DIR)
+        output_path = os.path.join(OUTPUT_DIR, f"motion_vectors_{file.filename}")
         comando = [
             "ffmpeg", "-flags2", "+export_mvs", "-i", input_path,
-            "-vf", "codecview=mv=pf+bf+bb",
-            output_path
+            "-vf", "codecview=mv=pf+bf+bb", output_path
         ]
-        subprocess.run(comando, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-
-        return {"message": "Video generado con motion vectors", "output_path": output_path}
+        subprocess.run(comando, check=True)
+        return {"message": "Video generado con macroblocks y motion vectors", "output_path": output_path}
     except Exception as e:
         return {"error": str(e)}
 
 
-# EJERCICIO 7
-class YUVHistogramModel(BaseModel):
-    input_path: str  # Relativo a `input`
-    output_path: str  # Relativo a `output`
-
+# 8. Generar histograma YUV
 @app.post("/generate_yuv_histogram/")
-def generate_yuv_histogram(data: YUVHistogramModel):
+async def generate_yuv_histogram(file: UploadFile = File(...)):
     try:
-        input_dir = os.path.join(BASE_MEDIA_DIR, "input")
-        output_dir = os.path.join(BASE_MEDIA_DIR, "output")
-        
-        input_path = os.path.join(input_dir, data.input_path)
-        output_path = os.path.join(output_dir, data.output_path)
-
+        input_path = save_uploaded_file(file, INPUT_DIR)
+        output_path = os.path.join(OUTPUT_DIR, f"histogram_{file.filename}")
         comando = [
             "ffmpeg", "-i", input_path,
             "-vf", "split=2[a][b];[b]histogram,format=yuv420p[hh];[a][hh]overlay",
             output_path
         ]
-        subprocess.run(comando, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-
-        return {"message": "Histograma YUV generado", "output_path": output_path}
+        subprocess.run(comando, check=True)
+        return {"message": "Video generado con el histograma YUV", "output_path": output_path}
     except Exception as e:
         return {"error": str(e)}
