@@ -226,7 +226,7 @@ def generate_yuv_histogram(data: YUVHistogramModel):
         #comando sacado de la pagina de ffmepg
         comando = [
             "ffmpeg", "-i", data.input_path,
-            "-vf", "split=2[a][b];[b]histogram,format=yuv420p[hh];levels=full[hh];[a][hh]overlay",
+            "-vf", "split=2[a][b];[b]histogram,format=yuv420p[hh];[a][hh]overlay",
             data.output_path
         ]
         
