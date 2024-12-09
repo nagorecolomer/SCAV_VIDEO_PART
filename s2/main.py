@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File,HTTPException
 from pydantic import BaseModel
 import subprocess
 import json
@@ -15,6 +15,12 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 # Inicializamos la app
 app = FastAPI()
 
+#EJERCICIO 1 S2
+class ResizeVideoModel(BaseModel):
+    input_path: str
+    output_path: str
+    width: int
+    height: int
 
 # Función para guardar un archivo subido
 def save_uploaded_file(file: UploadFile, folder: str) -> str:
@@ -169,3 +175,41 @@ async def generate_yuv_histogram(file: UploadFile = File(...)):
         return {"message": "Video generado con el histograma YUV", "output_path": output_path}
     except Exception as e:
         return {"error": str(e)}
+
+
+#EJERCICIO 1 P2
+# Modelo para recibir los datos de entrada
+class VideoConversionModel(BaseModel):
+    input_path: str
+    output_path: str
+    codec: str  # Puede ser "vp8", "vp9", "h265" o "av1"
+
+# Endpoint para convertir videos
+@app.post("/convert_video/")
+def convert_video(data: VideoConversionModel):
+    codec_map = {
+        "vp8": "libvpx",
+        "vp9": "libvpx-vp9",
+        "h265": "libx265",
+        "av1": "libaom-av1"
+    }
+
+    if data.codec not in codec_map:
+        raise HTTPException(status_code=400, detail="Códec no soportado. Usa vp8, vp9, h265 o av1.")
+
+    try:
+        # Construir el comando FFmpeg
+        comando = [
+            "ffmpeg", "-i", data.input_path,  # Archivo de entrada
+            "-c:v", codec_map[data.codec],   # Selección del códec
+            "-b:v", "1M",                    # Bitrate de salida
+            data.output_path                 # Archivo de salida
+        ]
+        # Ejecutar FFmpeg
+        subprocess.run(comando, check=True)
+
+        return {"message": f"Video convertido exitosamente a {data.codec}", "output_path": data.output_path}
+    except subprocess.CalledProcessError as e:
+        raise HTTPException(status_code=500, detail=f"Error al convertir el video: {e}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

@@ -1,35 +1,39 @@
-from fastapi import FastAPI,File, UploadFile
+from fastapi import FastAPI,HTTPException
 from pydantic import BaseModel
 import shutil
 import os
 import subprocess
-from first_seminar import ex2, ex3, ex4, ex5, ex5_2, ex6, ex7
-import test_first_seminar 
+import json
+
+from firts_seminar import ex2, ex3, ex4, ex5, ex5_2, ex6, ex7
+#import test_first_seminar 
 
 app = FastAPI()
 
 @app.get("/")
 async def root():
-    return {"message": "hola Uri,estoy probando"}
+    return {"message": "hola Uri, estoy probando"}
 
-""" @app.post("/upload-photo/")
-async def upload_photo(file: UploadFile = File(...)):
-    try:
-        # Ruta donde guardar la imagen subida dentro del contenedor
-        file_location = f"/app/uploaded_files/{file.filename}"
-        
-        # Guardar el archivo en el contenedor
-        with open(file_location, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-        
-        return {"message": "Photo uploaded successfully", "file_path": file_location}
-    except Exception as e:
-        return {"error": str(e)} """
-# Modelos para validar las solicitudes de entrada
+# Modelo para recibir los valores RGB
 class RGBModel(BaseModel):
     r: int
     g: int
     b: int
+
+# Endpoint para convertir RGB a YUV
+@app.post("/convertir_rgb_a_yuv/")
+def convertir_rgb_a_yuv(data: RGBModel):
+    try:
+        # Llamamos a la función RGB_to_YUV desde el archivo ex2
+        y, u, v = ex2.RGB_to_YUV(data.r, data.g, data.b)
+        
+        return {
+            "y": y,
+            "u": u,
+            "v": v
+        }
+    except Exception as e:
+        return {"error": str(e)}
 
 class ResizeImageModel(BaseModel):
     input_path: str
@@ -40,83 +44,49 @@ class ResizeImageModel(BaseModel):
 class RunLengthEncodingModel(BaseModel):
     data: list[int]
 
-    
-# EJERCICIO 1 P1
-@app.post("/rgb_to_yuv/")
-def test_RGB_to_YUV(data: RGBModel):
-    try:
-        y, u, v = ex2.RGB_to_YUV(data.r, data.g, data.b)
-        return {"Y": y, "U": u, "V": v}
-    except Exception as e:
-        return {"error": str(e)}
 
-# EJERCICIO 2 P1
-# @app.post("/yuv_to_rgb/")
-# def yuv_to_rgb(data: RGBModel):
-#     try:
-#         r, g, b = ex2.YUV_to_RGB(data.r, data.g, data.b)
-#         return {"R": r, "G": g, "B": b}
-#     except Exception as e:
-#         return {"error": str(e)}
 
 # EJERCICIO 3 P1
 @app.post("/resize_image/")
 def resize_image(data: ResizeImageModel):
     try:
-        result_path = ex3.redimensionar_imagen(data.input_path, data.output_path, data.width, data.height)
-        return {"output_path": result_path}
+        # Construir el comando FFmpeg para redimensionar la imagen
+        comando = [
+            "ffmpeg", "-i", data.input_path,
+            "-vf", f"scale={data.width}:{data.height}",
+            data.output_path
+        ]
+
+        # Ejecutar el comando FFmpeg
+        subprocess.run(comando, check=True)
+
+        return {"message": "Imagen redimensionada correctamente", "output_path": data.output_path}
+    except subprocess.CalledProcessError as e:
+        return {"error": f"Error al ejecutar FFmpeg: {e.stderr}"}
     except Exception as e:
         return {"error": str(e)}
 
-# EJERCICIO 4 P1
-# @app.post("/serpentine_diagonal/")
-# def serpentine_diagonal(matrix: list[list[int]]):
-#     try:
-#         result = ex4.serpentine_diagonal(matrix)
-#         return {"result": result}
-#     except Exception as e:
-#         return {"error": str(e)}
+
 
 # EJERCICIO 5 P1
 @app.post("/convertir_bn_y_comprimir/")
 def convertir_bn_y_comprimir(data: ResizeImageModel):
     try:
-        output_path = ex5.convertir_bn_y_comprimir(data.input_path, data.output_path)
-        return {"output_path": output_path}
+        command = [
+            'ffmpeg', '-i', data.input_path,  #especifica el archivo de entrada
+            '-vf', 'format=gray',        #convierte a blanco y negro
+            '-q:v', '31',                #aplica la compresión que quieras, numero de compression = [2, 31], a mayor numero mas compresion y viceversa
+            data.output_path                  #especifica el archivo de salida
+        ]
+        subprocess.run(command, check=True)
+        return {"message": "Imagen redimensionada correctamente", "output_path": data.output_path}
+    except subprocess.CalledProcessError as e:
+        return {"error": f"Error al ejecutar FFmpeg: {e.stderr}"}
     except Exception as e:
         return {"error": str(e)}
 
-# EJERCICIO 6 P1
-# @app.post("/run_length_encoding/")
-# def run_length_encoding(data: RunLengthEncodingModel):
-#     try:
-#         result = ex5_2.run_length_encoding(data.data)
-#         return {"result": result}
-#     except Exception as e:
-#         return {"error": str(e)}
 
-# EJERCICIO 7 P1
-""" @app.post("/dct_idct/")
-def dct_idct(data: list[list[float]]):
-    try:
-        result_dct = ex6.run_dct(data)
-        result_idct = ex6.run_idct(result_dct)
-        return {"result_dct": result_dct, "result_idct": result_idct}
-    except Exception as e:
-        return {"error": str(e)}
- """
-#EJERCICIO 8 P1
-""" @app.post("/dwt_idwt/")
-def dwt_idwt(data: list[list[float]]):
-    try:
-        LL, LH, HL, HH = ex7.apply_dwt(data)
-        reconstructed_data = ex7.apply_idwt(LL, LH, HL, HH)
-        return {"LL": LL, "LH": LH, "HL": HL, "HH": HH, "reconstructed_data": reconstructed_data}
-    except Exception as e:
-        return {"error": str(e)} """
-
-
-
+#--------------------EJERCICIOS S2--------------------------
 
 #EJERCICIO 1 S2
 class ResizeVideoModel(BaseModel):
@@ -353,6 +323,7 @@ def generate_yuv_histogram(data: YUVHistogramModel):
     except Exception as e:
         return {"error": str(e)}
 
+#-----------------EJERCICIOS P2----------------------
 
 #EJERCICIO 1 P2
 # Modelo para recibir los datos de entrada
@@ -390,3 +361,56 @@ def convert_video(data: VideoConversionModel):
         raise HTTPException(status_code=500, detail=f"Error al convertir el video: {e}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+#EJERCICIO 2 P2
+class AudioModificationModel(BaseModel):
+    input_path: str         # Ruta del archivo de entrada (video)
+    output_audio_path: str  # Ruta del archivo de salida (audio modificado)
+    audio_bitrate: str      # Bitrate deseado para el audio (por ejemplo, "128k", "256k")
+    audio_channels: int     # Número de canales, por ejemplo, 1 (mono), 2 (estéreo)
+    audio_format: str       # Formato deseado, como "aac", "mp3", "wav"
+
+
+# Reutilizando la función 'process_video' pero modificándola para que solo modifique el audio
+def process_video(input_path: str, output_audio_path: str, audio_bitrate: str, audio_channels: int, audio_format: str, is_audio_only=False):
+    try:
+        if is_audio_only:
+            comando = [
+                "ffmpeg", "-i", input_path,  # Ruta de entrada (video)
+                "-b:a", audio_bitrate,      # Bitrate del audio
+                "-ac", str(audio_channels), # Número de canales de audio
+                "-c:a", audio_format,       # Formato de audio
+                output_audio_path           # Ruta de salida (audio extraído)
+            ]
+        else:
+            # Si se necesita hacer más procesamiento (esto se reutiliza de la función original)
+            comando = [
+                "ffmpeg", "-i", input_path,  # Ruta de entrada
+                "-vf", "scale=1280:720",     # Ejemplo de un filtro (puedes agregar otros filtros o procesos)
+                "-c:a", audio_format,        # Audio formateado
+                output_audio_path            # Ruta de salida
+            ]
+
+        # Ejecutar el comando FFmpeg
+        subprocess.run(comando, check=True)
+
+        return {"message": "Audio modificado correctamente", "output_audio_path": output_audio_path}
+    except subprocess.CalledProcessError as e:
+        return {"error": f"Error al ejecutar FFmpeg: {e.stderr}"}
+    except Exception as e:
+        return {"error": str(e)}
+
+# Endpoint para modificar el audio
+@app.post("/modify_audio/")
+def modify_audio(data: AudioModificationModel):
+    # Llamamos a la función `process_video` para solo modificar el audio
+    return process_video(
+        input_path=data.input_path,
+        output_audio_path=data.output_audio_path,
+        audio_bitrate=data.audio_bitrate,
+        audio_channels=data.audio_channels,
+        audio_format=data.audio_format,
+        is_audio_only=True  # Indicamos que solo modificamos el audio
+    )
+
+
