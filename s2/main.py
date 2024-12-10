@@ -4,6 +4,7 @@ import subprocess
 import json
 import os
 import shutil
+from test_first_seminar import ex2, ex5  
 
 # Define rutas base para los archivos
 BASE_MEDIA_DIR = "media"
@@ -15,12 +16,6 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 # Inicializamos la app
 app = FastAPI()
 
-#EJERCICIO 1 S2
-class ResizeVideoModel(BaseModel):
-    input_path: str
-    output_path: str
-    width: int
-    height: int
 
 # Función para guardar un archivo subido
 def save_uploaded_file(file: UploadFile, folder: str) -> str:
@@ -40,7 +35,37 @@ async def upload_file(file: UploadFile = File(...)):
     except Exception as e:
         return {"error": str(e)}
 
+#ENDPOINT ELEGIDOS LAB1
+class RGBInput(BaseModel):
+    r: int
+    g: int
+    b: int
 
+class ImageInput(BaseModel):
+    image_path: str
+    output_path: str
+    
+@app.post("/convert_rgb_to_yuv/")
+async def convert_rgb_to_yuv(data: RGBInput):
+    r, g, b = data.r, data.g, data.b
+    y, u, v = ex2.RGB_to_YUV(r, g, b)
+    return {"Y": y, "U": u, "V": v}
+
+@app.post("/convert_bn_and_compress/")
+async def convert_bn_and_compress(data: ImageInput):
+    imagen = data.image_path
+    output = data.output_path
+    ex5.convertir_bn_y_comprimir(imagen, output)
+    return {"message": f"Imagen convertida y comprimida correctamente en {output}"}
+
+
+
+#EJERCICIO 1 S2
+class ResizeVideoModel(BaseModel):
+    input_path: str
+    output_path: str
+    width: int
+    height: int
 # 2. Redimensionar video
 @app.post("/resize_video/")
 async def resize_video(file: UploadFile = File(...), width: int = 1280, height: int = 720):
