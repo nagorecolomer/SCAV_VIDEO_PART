@@ -13,7 +13,7 @@ app = FastAPI()
 async def mensaje_inicial():
     return {"mensaje": "Buenas!! Bienvenidos a nuestra super API, quereis ver como funciona?"}
 
-#-------EJERCICIOS P1 Y S1-----------------------------------
+#-----------------------EJERCICIOS P1 Y S1-----------------------------------
 
 #Modelo para recibir los valores RGB
 class RGBModel(BaseModel):

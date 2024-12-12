@@ -19,6 +19,7 @@ class MonsterAPIGUI:
         
         #Mensaje inicial de la GUI (get del main)
         self.show_initial_message()
+        
         #Estilo para botones de la pestaña de imágenes
         style = ttk.Style()
         style.configure("Image.TButton", font=("Pacifico", 10, "bold"), foreground="white", background="#004d98")  # Azul oscuro
