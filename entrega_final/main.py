@@ -6,21 +6,22 @@ import subprocess
 import json
 
 from firts_seminar import ex2, ex3, ex4, ex5, ex5_2, ex6, ex7
-#import test_first_seminar 
 
 app = FastAPI()
 
 @app.get("/")
-async def root():
-    return {"message": "hola Uri, estoy probando"}
+async def mensaje_inicial():
+    return {"mensaje": "Buenas!! Bienvenidos a nuestra super API, quereis ver como funciona?"}
 
-# Modelo para recibir los valores RGB
+#-------EJERCICIOS P1 Y S1-----------------------------------
+
+#Modelo para recibir los valores RGB
 class RGBModel(BaseModel):
     r: int
     g: int
     b: int
 
-# Endpoint para convertir RGB a YUV
+#Endpoint para convertir RGB a YUV
 @app.post("/convertir_rgb_a_yuv/")
 def convertir_rgb_a_yuv(data: RGBModel):
     try:
@@ -46,7 +47,7 @@ class RunLengthEncodingModel(BaseModel):
 
 
 
-# EJERCICIO 3 P1
+#EJERCICIO 3 
 @app.post("/resize_image/")
 def resize_image(data: ResizeImageModel):
     try:
@@ -68,7 +69,7 @@ def resize_image(data: ResizeImageModel):
 
 
 
-# EJERCICIO 5 P1
+# EJERCICIO 5 
 @app.post("/convertir_bn_y_comprimir/")
 def convertir_bn_y_comprimir(data: ResizeImageModel):
     try:
@@ -76,7 +77,7 @@ def convertir_bn_y_comprimir(data: ResizeImageModel):
             'ffmpeg', '-i', data.input_path,  #especifica el archivo de entrada
             '-vf', 'format=gray',        #convierte a blanco y negro
             '-q:v', '31',                #aplica la compresión que quieras, numero de compression = [2, 31], a mayor numero mas compresion y viceversa
-            data.output_path                  #especifica el archivo de salida
+            data.output_path                 #especifica el archivo de salida
         ]
         subprocess.run(command, check=True)
         return {"message": "Imagen redimensionada correctamente", "output_path": data.output_path}
@@ -88,7 +89,7 @@ def convertir_bn_y_comprimir(data: ResizeImageModel):
 
 #--------------------EJERCICIOS S2--------------------------
 
-#EJERCICIO 1 S2
+#EJERCICIO 1 
 class ResizeVideoModel(BaseModel):
     input_path: str
     output_path: str
@@ -110,7 +111,7 @@ def resize_video(data: ResizeVideoModel):
         return {"error": str(e)}
     
 
-#EJERCICIO 2 S2
+#EJERCICIO 2 
 class ChromaSubsamplingModel(BaseModel):
     input_path: str
     output_path: str
@@ -130,7 +131,7 @@ def modify_chroma_subsampling(data: ChromaSubsamplingModel):
     except Exception as e:
         return {"error": str(e)}
 
-#EJERCICIO 3 S2
+#EJERCICIO 3 
 class VideoInfoModel(BaseModel):
     input_path: str
     
@@ -150,7 +151,7 @@ def get_video_info(data: VideoInfoModel):
 
         video_info = json.loads(resultado.stdout)
 
-        # Extraemos datos relevantes
+        #Extraemos datos relevantes
         formato = video_info.get("format", {})
         streams = video_info.get("streams", [{}])
 
@@ -170,7 +171,7 @@ def get_video_info(data: VideoInfoModel):
         return {"error": str(e)}
     
     
-#EJERCICIO 4 S2
+#EJERCICIO 4 
 class VideoProcessingModel(BaseModel):
     input_path: str
     output_video_path: str
@@ -190,19 +191,19 @@ def process_video(data: VideoProcessingModel):
         ], check=True)
 
         #extraemos el audio en diferentes formatos, los comando son sacados de la pagina oficial de ffmpeg
-        # AAC Mono
+        #AAC Mono
         subprocess.run([
             "ffmpeg", "-i", data.output_video_path, "-ac", "1",
             "-c:a", "aac", data.output_audio_aac
         ], check=True)
 
-        # MP3 Estéreo con menor bitrate
+        #MP3 Estéreo con menor bitrate
         subprocess.run([
             "ffmpeg", "-i", data.output_video_path, "-b:a", "96k",
             "-c:a", "libmp3lame", data.output_audio_mp3
         ], check=True)
 
-        # AC3 Codec
+        #AC3 Codec
         subprocess.run([
             "ffmpeg", "-i", data.output_video_path,
             "-c:a", "ac3", data.output_audio_ac3
@@ -221,7 +222,7 @@ def process_video(data: VideoProcessingModel):
     except Exception as e:
         return {"error": str(e)}
     
-#EJERCICIO 5 S2
+#EJERCICIO 5 
 class TrackInfoModel(BaseModel):
     input_path: str
 
@@ -269,7 +270,7 @@ def count_tracks(data: TrackInfoModel):
     except Exception as e:
         return {"error": str(e)}
     
-#EJERCICIO 6 S2
+#EJERCICIO 6 
 class MotionVectorModel(BaseModel):
     input_path: str
     output_path: str
@@ -296,12 +297,12 @@ def generate_motion_vectors(data: MotionVectorModel):
         return {"error": str(e)}
     
     
-#EJERCICIO 7 S2
+#EJERCICIO 7 
 class YUVHistogramModel(BaseModel):
     input_path: str
     output_path: str
 
-# Endpoint para generar el histograma YUV
+#Endpoint para generar el histograma YUV
 @app.post("/generate_yuv_histogram/")
 def generate_yuv_histogram(data: YUVHistogramModel):
     try:
@@ -325,14 +326,14 @@ def generate_yuv_histogram(data: YUVHistogramModel):
 
 #-----------------EJERCICIOS P2----------------------
 
-#EJERCICIO 1 P2
-# Modelo para recibir los datos de entrada
+#EJERCICIO 1 
+#Modelo para recibir los datos de entrada
 class VideoConversionModel(BaseModel):
     input_path: str
     output_path: str
-    codec: str  # Puede ser "vp8", "vp9", "h265" o "av1"
+    codec: str  #Puede ser "vp8", "vp9", "h265" o "av1"
 
-# Endpoint para convertir videos
+#Endpoint para convertir videos
 @app.post("/convert_video/")
 def convert_video(data: VideoConversionModel):
     codec_map = {
@@ -346,7 +347,7 @@ def convert_video(data: VideoConversionModel):
         raise HTTPException(status_code=400, detail="Códec no soportado. Usa vp8, vp9, h265 o av1.")
 
     try:
-        # Construir el comando FFmpeg
+        #Construir el comando FFmpeg
         comando = [
             "ffmpeg", "-i", data.input_path,  # Archivo de entrada
             "-c:v", codec_map[data.codec],   # Selección del códec
@@ -362,7 +363,7 @@ def convert_video(data: VideoConversionModel):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-#EJERCICIO 2 P2
+#EJERCICIO 2 
 class AudioModificationModel(BaseModel):
     input_path: str         # Ruta del archivo de entrada (video)
     output_audio_path: str  # Ruta del archivo de salida (audio modificado)
@@ -371,7 +372,7 @@ class AudioModificationModel(BaseModel):
     audio_format: str       # Formato deseado, como "aac", "mp3", "wav"
 
 
-# Reutilizando la función 'process_video' pero modificándola para que solo modifique el audio
+#Reutilizando la función 'process_video' pero modificándola para que solo modifique el audio
 def process_video(input_path: str, output_audio_path: str, audio_bitrate: str, audio_channels: int, audio_format: str, is_audio_only=False):
     try:
         if is_audio_only:
@@ -383,7 +384,7 @@ def process_video(input_path: str, output_audio_path: str, audio_bitrate: str, a
                 output_audio_path           # Ruta de salida (audio extraído)
             ]
         else:
-            # Si se necesita hacer más procesamiento (esto se reutiliza de la función original)
+            #Si se necesita hacer más procesamiento (esto se reutiliza de la función original)
             comando = [
                 "ffmpeg", "-i", input_path,  # Ruta de entrada
                 "-vf", "scale=1280:720",     # Ejemplo de un filtro (puedes agregar otros filtros o procesos)
@@ -391,7 +392,7 @@ def process_video(input_path: str, output_audio_path: str, audio_bitrate: str, a
                 output_audio_path            # Ruta de salida
             ]
 
-        # Ejecutar el comando FFmpeg
+        #Ejecutar el comando FFmpeg
         subprocess.run(comando, check=True)
 
         return {"message": "Audio modificado correctamente", "output_audio_path": output_audio_path}
@@ -400,17 +401,17 @@ def process_video(input_path: str, output_audio_path: str, audio_bitrate: str, a
     except Exception as e:
         return {"error": str(e)}
 
-# Endpoint para modificar el audio
+#Endpoint para modificar el audio
 @app.post("/modify_audio/")
 def modify_audio(data: AudioModificationModel):
-    # Llamamos a la función `process_video` para solo modificar el audio
+    #Llamamos a la función `process_video` para solo modificar el audio
     return process_video(
         input_path=data.input_path,
         output_audio_path=data.output_audio_path,
         audio_bitrate=data.audio_bitrate,
         audio_channels=data.audio_channels,
         audio_format=data.audio_format,
-        is_audio_only=True  # Indicamos que solo modificamos el audio
+        is_audio_only=True  #Indicamos que solo modificamos el audio
     )
 
 

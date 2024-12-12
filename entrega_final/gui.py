@@ -11,31 +11,33 @@ class MonsterAPIGUI:
         self.root.title("Monster API NAGO & URI")
         self.root.geometry("800x600")
 
-        # Estilo para mejorar la apariencia
+        #Estilo para mejorar la apariencia
         self.style = ttk.Style()
         self.style.theme_use("clam")
         self.style.configure("TButton", font=("Pacifico", 10, "bold"))
         self.style.configure("TLabel", font=("Pacifico", 10))
         
-        # Estilo para botones de la pestaña de imágenes
+        #Mensaje inicial de la GUI (get del main)
+        self.show_initial_message()
+        #Estilo para botones de la pestaña de imágenes
         style = ttk.Style()
         style.configure("Image.TButton", font=("Pacifico", 10, "bold"), foreground="white", background="#004d98")  # Azul oscuro
         style.map("Image.TButton", background=[("active", "#5A9BD5")])  # Azul más claro al hacer clic
 
-        # Estilo para botones de la pestaña de videos
+        #Estilo para botones de la pestaña de videos
         style.configure("Video.TButton", font=("Pacifico", 10, "bold"), foreground="white", background="#a50044")  # Rojo
         style.map("Video.TButton", background=[("active", "#D46A6A")])  # Rojo más claro al hacer clic
 
-        # Estilo para botones de la pestaña de otras funcionalidades
+        #Estilo para botones de la pestaña de otras funcionalidades
         style.configure("Misc.TButton", font=("Pacifico", 10, "bold"), foreground="black", background="#edbb00")  # Amarillo
         style.map("Misc.TButton", background=[("active", "#FFEC8B")])  # Amarillo más claro al hacer clic
 
         
-        # Notebook para organizar pestañas
+        #Notebook para organizar pestañas
         self.notebook = ttk.Notebook(self.root)
         self.notebook.pack(expand=True, fill="both")
 
-        # Pestañas
+        #Pestañas
         self.create_image_tab()
         self.create_video_tab()
         self.create_other_tab()
@@ -44,9 +46,9 @@ class MonsterAPIGUI:
         """Envía una solicitud y muestra una barra de progreso mientras se procesa."""
         progress = Progressbar(self.root, orient="horizontal", mode="indeterminate", length=300)
         progress.pack(pady=10)
-        progress.start()  # Inicia la animación de la barra de progreso
+        progress.start()  #Inicia la animación de la barra de progreso
 
-        # Enviar la solicitud en un hilo separado para no bloquear la interfaz
+        #Enviar la solicitud en un hilo separado para no bloquear la interfaz
         threading.Thread(target=self.send_request, args=(endpoint, data, progress)).start()
 
     def send_request(self, endpoint, data, progress):
@@ -61,6 +63,17 @@ class MonsterAPIGUI:
         finally:
             progress.stop()  # Detener la barra de progreso
             progress.destroy()  # Eliminar la barra de progreso de la interfaz
+    
+    def show_initial_message(self):
+        try:
+            url = "http://127.0.0.1:8000/"  
+            response = requests.get(url)
+            response.raise_for_status()
+            mensaje = response.json().get("mensaje", "¡Bienvenido a Monster API GUI!")
+            messagebox.showinfo("Mensaje Inicial", mensaje)
+        except requests.exceptions.RequestException as e:
+            messagebox.showerror("Error", f"No se pudo obtener el mensaje inicial: {str(e)}")
+
     
     def create_image_tab(self):
         """Crea la pestaña de procesamiento de imágenes."""
