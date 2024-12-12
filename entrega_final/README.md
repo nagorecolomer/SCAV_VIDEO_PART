@@ -10,46 +10,28 @@ La aplicación está dividida en varias pestañas para organizar las funcionalid
 - **Procesar Videos**: Funciones para modificar videos y sus características.
 - **Otras Funcionalidades**: Opciones adicionales para trabajar con histograma YUV, modificar audio y convertir videos a diferentes códecs.
 
-## Requisitos
+Dockerfile: Configuración del Entorno en un Contenedor
+El proyecto incluye un Dockerfile para facilitar la configuración y despliegue del entorno. Con el Dockerfile, puedes construir una imagen que contenga tanto la GUI como el servidor API, asegurando que el proyecto se ejecute de forma consistente en cualquier máquina con Docker instalado.
 
-Para ejecutar la aplicación, necesitas tener instalado Python y algunas bibliotecas. Puedes instalar las dependencias con `pip`:
-
-```bash
-pip install tkinter requests
-```
-
-## Instalación y Ejecución
-
-1. Clona este repositorio a tu máquina local:
+#Pasos para Usar el Dockerfile
+1. Clona el repositorio:
 
    ```bash
-   git clone https://github.com/tu_usuario/monster_api_gui.git
+   git clone <URL_DEL_REPOSITORIO>
+   cd <NOMBRE_DEL_DIRECTORIO>
    ```
-
-2. Navega a la carpeta del proyecto:
+2. Construye la imagen Docker:
 
    ```bash
-   cd monster_api_gui
+   docker build -t monster-api-gui .
    ```
-
-3. Ejecuta el archivo `main.py` para iniciar la GUI:
-
+3. Ejecuta el contenedor:
    ```bash
-   python main.py
+   docker run -p 8000:8000 monster-api-gui
    ```
-
-## Estructura del Proyecto
-
-La estructura de archivos es la siguiente:
-
-```
-monster_api_gui/
-│
-├── README.md            # Este archivo con la documentación
-├── main.py              # Código principal de la GUI
-└── documents/           # Documentos relacionados, como la especificación de la API, etc.
-```
-
+   La API estará disponible en http://127.0.0.1:8000/.
+   La GUI se ejecutará en tu máquina local (ya que utiliza la pantalla local para tkinter).
+   
 ## Uso de la GUI
 
 ### Interfaz Gráfica
@@ -100,15 +82,6 @@ Este es un paso necesario para asegurar que todos los archivos resultantes se gu
     - La pestaña de **Otras Funcionalidades** tiene un fondo amarillo claro (`#FFFF9E`).
     - Los botones dentro de cada pestaña tienen colores personalizados para mejorar la experiencia de usuario.
 
-## Contribuciones
-
-Si deseas contribuir a este proyecto, por favor sigue estos pasos:
-
-1. Fork este repositorio.
-2. Crea una nueva rama (`git checkout -b feature-nueva-funcionalidad`).
-3. Realiza tus cambios y haz commit (`git commit -am 'Añadir nueva funcionalidad'`).
-4. Empuja tus cambios a tu repositorio fork (`git push origin feature-nueva-funcionalidad`).
-5. Abre un pull request.
 
 ## Licencia
 
