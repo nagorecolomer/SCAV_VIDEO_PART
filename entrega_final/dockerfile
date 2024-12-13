@@ -12,8 +12,7 @@ RUN mkdir -p /app/inputs /app/outputs
 
 # Copia los archivos necesarios para la GUI y la API
 COPY main.py /app/
-COPY gui.py /app/  # Asegúrate de incluir el archivo de tu GUI
-
+COPY gui.py /app/  
 # Instala las dependencias de la GUI y la API
 RUN pip install fastapi[standard] uvicorn numpy opencv-python-headless scipy pywavelets pillow requests
 
