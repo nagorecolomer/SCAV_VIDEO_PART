@@ -13,37 +13,7 @@ app = FastAPI()
 async def mensaje_inicial():
     return {"mensaje": "Buenas!! Bienvenidos a nuestra super API, quereis ver como funciona?"}
 
-#-----------------------EJERCICIOS P1 Y S1-----------------------------------
 
-#Modelo para recibir los valores RGB
-class RGBModel(BaseModel):
-    r: int
-    g: int
-    b: int
-
-#Endpoint para convertir RGB a YUV
-@app.post("/convertir_rgb_a_yuv/")
-def convertir_rgb_a_yuv(data: RGBModel):
-    try:
-        # Llamamos a la función RGB_to_YUV desde el archivo ex2
-        y, u, v = ex2.RGB_to_YUV(data.r, data.g, data.b)
-        
-        return {
-            "y": y,
-            "u": u,
-            "v": v
-        }
-    except Exception as e:
-        return {"error": str(e)}
-
-class ResizeImageModel(BaseModel):
-    input_path: str
-    output_path: str
-    width: int
-    height: int
-
-class RunLengthEncodingModel(BaseModel):
-    data: list[int]
 
 
 
@@ -69,25 +39,8 @@ def resize_image(data: ResizeImageModel):
 
 
 
-# EJERCICIO 5 
-@app.post("/convertir_bn_y_comprimir/")
-def convertir_bn_y_comprimir(data: ResizeImageModel):
-    try:
-        command = [
-            'ffmpeg', '-i', data.input_path,  #especifica el archivo de entrada
-            '-vf', 'format=gray',        #convierte a blanco y negro
-            '-q:v', '31',                #aplica la compresión que quieras, numero de compression = [2, 31], a mayor numero mas compresion y viceversa
-            data.output_path                 #especifica el archivo de salida
-        ]
-        subprocess.run(command, check=True)
-        return {"message": "Imagen redimensionada correctamente", "output_path": data.output_path}
-    except subprocess.CalledProcessError as e:
-        return {"error": f"Error al ejecutar FFmpeg: {e.stderr}"}
-    except Exception as e:
-        return {"error": str(e)}
 
 
-#--------------------EJERCICIOS S2--------------------------
 
 #EJERCICIO 1 
 class ResizeVideoModel(BaseModel):
@@ -117,21 +70,7 @@ class ChromaSubsamplingModel(BaseModel):
     output_path: str
     subsampling: str  #Buscar valores en la lista de ffmepg
 
-#endpoint para modificar el chroma subsampling
-@app.post("/modify_chroma_subsampling/")
-def modify_chroma_subsampling(data: ChromaSubsamplingModel):
-    try:
-        comando = [
-            "ffmpeg", "-i", data.input_path,  
-            "-pix_fmt", data.subsampling,
-            data.output_path
-        ]
-        subprocess.run(comando, check=True)
-        return {"message": "Chroma subsampling modificado correctamente", "output_path": data.output_path}
-    except Exception as e:
-        return {"error": str(e)}
 
-#EJERCICIO 3 
 class VideoInfoModel(BaseModel):
     input_path: str
     
@@ -244,87 +183,8 @@ def obtener_pistas(file_path: str, stream_type: str) -> list:
     info = json.loads(resultado.stdout)
     return info.get("streams", [])
 
-@app.post("/count_tracks/")
-def count_tracks(data: TrackInfoModel):
-    try:
-        #optenemos los tracks por separado
-        video_tracks = obtener_pistas(data.input_path, "v")  #video
-        audio_tracks = obtener_pistas(data.input_path, "a")  #audio
-        subtitle_tracks = obtener_pistas(data.input_path, "s")  #subtítulos
 
-        #contamos cada track
-        num_video_tracks = len(video_tracks)
-        num_audio_tracks = len(audio_tracks)
-        num_subtitle_tracks = len(subtitle_tracks)
 
-        #sumamos el total 
-        total_tracks = num_video_tracks + num_audio_tracks + num_subtitle_tracks
-
-        return {
-            "total_tracks": total_tracks,
-            "video_tracks": num_video_tracks,
-            "audio_tracks": num_audio_tracks,
-            "subtitle_tracks": num_subtitle_tracks
-        }
-
-    except Exception as e:
-        return {"error": str(e)}
-    
-#EJERCICIO 6 
-class MotionVectorModel(BaseModel):
-    input_path: str
-    output_path: str
-
-@app.post("/generate_motion_vectors/")
-def generate_motion_vectors(data: MotionVectorModel):
-    try:
-        #comando sacado de la pagina de ffmepg
-        comando = [
-            "ffmpeg", "-flags2", "+export_mvs", "-i", data.input_path,
-            "-vf", "codecview=mv=pf+bf+bb",
-            data.output_path
-        ]
-        
-        subprocess.run(comando, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-
-        return {
-            "message": "Video generado con macroblocks y motion vectors",
-            "output_path": data.output_path
-        }
-    except subprocess.CalledProcessError as e:
-        return {"error": f"FFmpeg failed: {e.stderr}"}
-    except Exception as e:
-        return {"error": str(e)}
-    
-    
-#EJERCICIO 7 
-class YUVHistogramModel(BaseModel):
-    input_path: str
-    output_path: str
-
-#Endpoint para generar el histograma YUV
-@app.post("/generate_yuv_histogram/")
-def generate_yuv_histogram(data: YUVHistogramModel):
-    try:
-        #comando sacado de la pagina de ffmepg
-        comando = [
-            "ffmpeg", "-i", data.input_path,
-            "-vf", "split=2[a][b];[b]histogram,format=yuv420p[hh];[a][hh]overlay",
-            data.output_path
-        ]
-        
-        subprocess.run(comando, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-
-        return {
-            "message": "Video generado con el histograma YUV",
-            "output_path": data.output_path
-        }
-    except subprocess.CalledProcessError as e:
-        return {"error": f"FFmpeg failed: {e.stderr}"}
-    except Exception as e:
-        return {"error": str(e)}
-
-#-----------------EJERCICIOS P2----------------------
 
 #EJERCICIO 1 
 #Modelo para recibir los datos de entrada
@@ -340,6 +200,7 @@ def convert_video(data: VideoConversionModel):
         "vp8": "libvpx",
         "vp9": "libvpx-vp9",
         "h265": "libx265",
+        "h264": "libx264",
         "av1": "libaom-av1"
     }
 
